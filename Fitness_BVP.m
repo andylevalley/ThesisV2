@@ -33,19 +33,21 @@ TrajTime = [];
 
 for i = 1:length(Order)
     
+    tgt = dvar(i);
+
     [x_drift,v_drift] = CWHPropagator(CurrentState(1:3)',CurrentState(4:6)',Omega,TransferTimes(n));
     CurrentState = [x_drift',v_drift'];
     
     solinit = bvpinit(linspace(0,TransferTimes(n+1),150),[0 0 0 0 0 0 0 0]);
-    options = bvpset('RelTol',1e-6);
-    sol = bvp4c(@BVP_ode,@BVP_bc,solinit,options,CurrentState,TargetInfo(i,:),Omega);
+    options = bvpset('RelTol',1e-6,'Stats','on');
+    sol = bvp4c(@BVP_ode,@BVP_bc,solinit,options,CurrentState,TargetInfo(tgt,:),Omega);
     t = [sol.x];
     x = [sol.y]; 
     u_x = -x(6,:);
     u_y = -x(8,:);
     CurrentState = [x(1,end) x(3,end) 0 x(2,end) x(4,end) 0];
     
-    TrajState = horzcat(TrajState,x);
+    TrajState = horzcat(TrajState, x(1:4,:));
     TrajControl = horzcat(TrajControl,[u_x;u_y]);
     TrajTime = horzcat(TrajTime,t);
     
@@ -67,7 +69,7 @@ u_x = -x(6,:);
 u_y = -x(8,:);
 CurrentState = [x(1,end) x(3,end) 0 x(2,end) x(4,end) 0];
 
-TrajState = horzcat(TrajState,x);
+TrajState = horzcat(TrajState, x(1:4,:));
 TrajControl = horzcat(TrajControl,[u_x;u_y]);
 TrajTime = horzcat(TrajTime,t);
 

@@ -17,9 +17,15 @@ opts = optimoptions('ga','CrossoverFraction',CrossoverFraction,...
                     'MaxGenerations',MaxGenerations,'PlotFcn',@gaplotbestf,...
                     'UseParallel',UseParallel);
                 
-% Fitness and Penalty Function definition    
-FitnessFunction = @(dvar) Fitness_BVP(dvar,Problem);
-ConstraintFunction = @(dvar) constraint(dvar,Problem);
+% Fitness and Penalty Function definition
+switch Problem.GA.FitnessFunction
+    case 1
+        FitnessFunction = @(dvar) Fitness_HCWimpulsive(dvar,Problem);
+        ConstraintFunction = @(dvar) constraint(dvar,Problem);
+    case 2
+        FitnessFunction = @(dvar) Fitness_BVP(dvar,Problem);
+        ConstraintFunction = @(dvar) constraint(dvar,Problem);
+end
 
 [dvar,fval,exitflag,output] = ga(FitnessFunction,numvars,[],[],[],[],...
     lb,ub,ConstraintFunction,IntCon,opts); 
