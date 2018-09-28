@@ -11,6 +11,7 @@ switch Type
         ae = Marks{i,2};
         xd = Marks{i,3};
         yd = Marks{i,4};
+        beta = beta(i);
 
         x = (-ae/2)*cos(beta) + xd;
         y = ae*sin(beta) + yd;

@@ -5,7 +5,7 @@ clear all
 Problem.TimeTotal = 60*60*24*2.5; % seconds
 Problem.NumberMarks = 2;
 Problem.Omega = 7.291e-5; % mean motion (rad/sec)
-Problem.InitState = [30 30 0 0 0 0]; % [x,y,z,xdot,ydot,zdot];
+Problem.InitState = [0 0 0 0 0 0]; % [x,y,z,xdot,ydot,zdot];
 
 % UTC and JD time at beginning of maneuver, i.e. at t_0
 yr0 = 2017;
@@ -24,6 +24,8 @@ Problem.lb_loiter = 60*60*24;
 Problem.lb_transfer = 60*30;
 Problem.ub_loiter = 60*60*25;
 Problem.ub_transfer = 60*60*24;
+Problem.ub_beta = 2*pi;
+Problem.lb_beta = 0;
 
 %% Optimization Parameters
 Problem.GA.Popsize = 50;

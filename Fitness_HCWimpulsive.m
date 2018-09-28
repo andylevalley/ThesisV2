@@ -13,7 +13,7 @@ TransferTimes = dvar(NumberMarks+1:end);
 %% Targeting
 InitState = Problem.InitState;
 Marks = Problem.Mark.Info;
-beta = pi;
+beta = dvar(end-NumberMarks+1:end);
 
 count = size(Marks,1);
 
