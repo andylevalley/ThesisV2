@@ -2,7 +2,7 @@ clc
 clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%% Shell Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Scenario Parameters
-Problem.TimeTotal = 60*60*24*2.5; % seconds
+Problem.TimeTotal = 60*60*24*3; % seconds
 Problem.NumberMarks = 2;
 Problem.Omega = 7.291e-5; % mean motion (rad/sec)
 Problem.InitState = [0 0 0 0 0 0]; % [x,y,z,xdot,ydot,zdot];
@@ -28,17 +28,20 @@ Problem.ub_beta = 2*pi;
 Problem.lb_beta = 0;
 
 %% Optimization Parameters
-Problem.GA.Popsize = 50;
+Problem.GA.Popsize = 100;
 Problem.GA.EliteCount = ceil(0.1*Problem.GA.Popsize);
 Problem.GA.MaxGenerations = 500;
 Problem.GA.UseParallel = false;
 Problem.GA.CrossoverFraction = 0.9;
 
 %% Define Marks
-% ['NMC', ae, yd, xd, constraint]
+% ['NMC', ae, yd, xd, zmax, upsilon, constraint]
 % ['TD', size, yd, xd, constraint]
-Problem.Mark.Info = [{'NMC',5,0,0,'sun'};
-                     {'NMC',10,0,0,'sun'}];
+ae = 5;
+halfconeangle = deg2rad(20);
+zmax = ae*tan(halfconeangle);
+Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
+                     {'NMC',ae,0,0,zmax,pi/2,'sun'}];
 
 %% Fitness Function
 % 1 = HCWimpulsive, 2 = BVP
@@ -50,6 +53,10 @@ Problem = UnpackShell(Problem);
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Run GA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Solution = RunGA(Problem);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%% Plot Solution %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Propagate Solution %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Solution = PropagateSolution(Solution,Problem);
 
+plot3(Solution.BVP.TrajState(2,:),Solution.BVP.TrajState(1,:),Solution.BVP.TrajState(3,:))
+xlabel('y');
+ylabel('x');
+zlabel('z');
