@@ -10,7 +10,7 @@ dvar = Solution.dvar;
 
 % Seperate chromosome
 Order = dvar(1:NumberMarks);
-TransferTimes = dvar(NumberMarks+1:end);
+TransferTimes = dvar(NumberMarks+1:end-NumberMarks);
 
 % Targeting
 InitState = Problem.InitState;

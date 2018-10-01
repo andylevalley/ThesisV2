@@ -3,16 +3,26 @@ function [c ceq] = constraint(dvar,Problem)
 %% pull out relevent values from Problem structure
 NumberMarks = Problem.NumberMarks;
 TimeJD = Problem.Time.JD;
-TimeUTCO = Problem.Time.UTCO;
+UTCO = Problem.Time.UTCO;
 TimeTotal = Problem.TimeTotal;
 Omega = Problem.Omega;
 
-r_RSO = [42,164;0;0];
-v_RSO = [0;sqrt(mu/r_RSO);0];
+sma = Problem.RSO.Parms.sma; % semi-major axis of *circular* RSO or virtual RSO (km)
+nu0 = Problem.RSO.Parms.nu0; % initial true anomaly of RSO or virtual RSO (deg)
+ecc = Problem.RSO.Parms.ecc; % eccentricity - this should be or stay very close to zero - we are using the HCW equations!
+incl = Problem.RSO.Parms.incl; % inclination (deg) - this combined with RAAN should be appropriate for use (see dissertation)
+RAAN = Problem.RSO.Parms.RAAN; % right ascension of the ascending node (deg) - see note above
+argp = Problem.RSO.Parms.argp; % argument of perigee (deg)
+arglat = Problem.RSO.Parms.arglat; % for ci orbit
+truelon = Problem.RSO.Parms.truelon; % for ce orbit
+lonper = Problem.RSO.Parms.lonper; % for ee orbit
+w = Problem.RSO.Parms.w;
+p = Problem.RSO.Parms.p;
+mu = Problem.mu;
 
 %% Seperate chromosome
 Order = dvar(1:NumberMarks);
-TransferTimes = dvar(NumberMarks+1:end);
+TransferTimes = dvar(NumberMarks+1:end-2);
 
 test = 1:1:NumberMarks;
 A = sum(Order == test,1);
@@ -41,28 +51,39 @@ for i = 1:count
 end
 
 % Starting after initial wait and transfer
-clock = TransferTimes(1);
+clock = sum(TransferTimes(1:2));
 n = 3;
+
+nu_current = nu0 + w*clock;
+secs = UTCO(6) + clock;
 
 for i = 1:NumberMarks
     
     tgt = dvar(i);
-    secs = UTCO(6) + clock;
-    
-    Sun2RSO_Start = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),secs,r_RSO,v_RSO);
-    
+
+    [r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
+    Sun2RSO_Start = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),secs,r_RSO,v_RSO)';
     StartState = TargetInfo(tgt,1:6);
     
     [x_drift,v_drift] = CWHPropagator(StartState(1:3)',StartState(4:6)',Omega,TransferTimes(n));
     EndState = [x_drift',v_drift'];
-    
     secs = secs + TransferTimes(n);
+    Sun2RSO_End = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),secs,r_RSO,v_RSO)';
     
-    Sun2RSO_End = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),secs,r_RSO,v_RSO);
+    thetaStart = acos(dot(StartState(1:3),Sun2RSO_Start)/(norm(StartState(1:3))*norm(Sun2RSO_Start)));
+    thetaEnd = acos(dot(EndState(1:3),Sun2RSO_End)/(norm(EndState(1:3))*norm(Sun2RSO_End)));
     
+    if strcmp(Marks{i,end},'sun') == 1
+        c(end+1:end+2,1) = [-30*pi/180 + thetaStart];
+        
+    end
     
-    clock = clock + TrasnferTimes(n-1) + TranferTimes(n);
+    clock = clock + TransferTimes(n) + TransferTimes(n+1);
+    secs = secs + clock;
+    nu_current = nu_current + w*clock;
     n = n + 2;
+    
+end
     
     
     
