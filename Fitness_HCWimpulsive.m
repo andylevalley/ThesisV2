@@ -50,7 +50,7 @@ end
 [x_drift,v_drift] = CWHPropagator(CurrentState(1:3)',CurrentState(4:6)',Omega,TransferTimes(n));
 CurrentState = [x_drift',v_drift'];
 
-ReturnState = [0 0 0 0 0 0];
+ReturnState = InitState;
 
 DeltaV = HCW_DeltaV(CurrentState(1:3)',ReturnState(1:3)',...
     CurrentState(4:6)',ReturnState(4:6)',TransferTimes(n+1),Omega);

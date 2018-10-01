@@ -70,7 +70,7 @@ TrajState = horzcat(TrajState, [x_drift(1:3,:);v_drift(1:3,:)]);
 TrajControl = horzcat(TrajControl,zeros(3,ceil(TransferTimes(n))));
 TrajTime = horzcat(TrajTime,clock:TransferTimes(n));
 
-ReturnState = [0 0 0 0 0 0];
+ReturnState = InitState;
 
 solinit = bvpinit(linspace(0,ceil(TransferTimes(n+1)),150),[0 0 0 0 0 0 0 0 0 0 0 0]);
 options = bvpset('RelTol',1e-6);
