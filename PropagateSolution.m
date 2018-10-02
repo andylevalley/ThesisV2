@@ -53,6 +53,8 @@ for i = 1:length(Order)
     CurrentState = [x(:,end)'];
     
     
+    
+    
     state = interp1(t,x',0:1:ceil(TransferTimes(n+1)));
     TrajState = horzcat(TrajState, state(:,1:6)');
     TrajControl = horzcat(TrajControl,state(:,10:12)');
@@ -191,5 +193,45 @@ TrajControl = horzcat(TrajControl,state(:,7:11)');
 Solution.GPOPS.TrajState = TrajState;
 Solution.GPOPS.TrajControl = TrajControl;
 Solution.GPOPS.TrajTime = TrajTime;
+
+%% Find Sun Angle throughout trajectory
+Traj = Solution.GPOPS.TrajState;
+sma = Problem.RSO.Parms.sma; % semi-major axis of *circular* RSO or virtual RSO (km)
+nu0 = Problem.RSO.Parms.nu0; % initial true anomaly of RSO or virtual RSO (deg)
+ecc = Problem.RSO.Parms.ecc; % eccentricity - this should be or stay very close to zero - we are using the HCW equations!
+incl = Problem.RSO.Parms.incl; % inclination (deg) - this combined with RAAN should be appropriate for use (see dissertation)
+RAAN = Problem.RSO.Parms.RAAN; % right ascension of the ascending node (deg) - see note above
+argp = Problem.RSO.Parms.argp; % argument of perigee (deg)
+arglat = Problem.RSO.Parms.arglat; % for ci orbit
+truelon = Problem.RSO.Parms.truelon; % for ce orbit
+lonper = Problem.RSO.Parms.lonper; % for ee orbit
+w = Problem.RSO.Parms.w;
+p = Problem.RSO.Parms.p;
+mu = Problem.mu;
+
+TimeJD = Problem.Time.JD;
+clock = 0;
+n = 1;
+
+for i = 1:100:length(Traj)
+    
+    
+    TimeJD = TimeJD + clock/3600/24; % clock is in seconds
+    UTCO = JDtoGregorianDate(TimeJD);
+    nu_current = nu0 + w*clock;
+
+    [r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
+    Sun2RSO = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO)';
+    
+    theta = acos(dot(Traj(1:3,i),Sun2RSO)/(norm(Traj(1:3,i))*norm(Sun2RSO)));
+    
+    SunAngle(1,n) = theta;
+        
+    clock = clock + 1;
+    n = n + 1;
+    
+end
+
+Solution.GPOPS.SunAngle = SunAngle;
 
 end
