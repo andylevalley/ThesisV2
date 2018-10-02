@@ -96,5 +96,100 @@ Solution.BVP.TrajState = TrajState;
 Solution.BVP.TrajControl = [TrajControl; alpha;beta];
 Solution.BVP.TrajTime = TrajTime;
 
+%% Propagate GPOPS
+% Calculate Fitness
+% initialize variables
+
+% auxdata.T  = 0.1405; % thrust
+auxdata.a0 = .05; %.0686; % N/kg - initial acceleration .05 originally
+% auxdata.m0 = 1; % initial mass
+auxdata.c = 3.333e3; %3000; % m/s
+% auxdata.dm = 0.0749; % mass flow rate
+R_e = 6378.137; % km - Earth radius
+alt = 35786; % km - GEO altitude
+w = sqrt(398600.5/(R_e+alt)^3);
+auxdata.w = w;
+
+CurrentState = InitState;
+n = 1;
+TrajState = [];
+TrajControl = [];
+TrajTime = [];
+clock = 0;
+
+for i = 1:length(Order)
+    
+    [x_drift,v_drift] = CWHPropagator(CurrentState(1:3)',CurrentState(4:6)',Omega,0:TransferTimes(n));
+    CurrentState = [x_drift(1:3,end)',v_drift(1:3,end)'];
+    
+    TrajState = horzcat(TrajState, [x_drift(1:3,:);v_drift(1:3,:)]);
+    TrajControl = horzcat(TrajControl,zeros(5,ceil(TransferTimes(n))));
+    TrajTime = horzcat(TrajTime,clock:TransferTimes(n));
+    
+    output = PropagateGPOPS(CurrentState(1:6),TargetInfo(Order(i),:),0,ceil(TransferTimes(n+1)),auxdata);
+    solution = output.result.solution;
+    
+    x1    = solution.phase(1).state(:,1); % km
+    y1    = solution.phase(1).state(:,2); % km
+    z1    = solution.phase(1).state(:,3); % km
+    xdot  = solution.phase(1).state(:,4); % km/s
+    ydot  = solution.phase(1).state(:,5); % km/s
+    zdot  = solution.phase(1).state(:,6); % km/s
+    alpha = solution.phase(1).state(:,7); % rad
+    beta  = solution.phase(1).state(:,8); % rad
+    alphadot  = solution.phase(1).control(:,1); 
+    betadot   = solution.phase(1).control(:,2); 
+    thr       = solution.phase(1).control(:,3); 
+    
+    x = [x1';y1';z1';xdot';ydot';zdot';alpha';beta';alphadot';betadot';thr'];
+    t = solution.phase(1).time; % NOW IN MINUTES
+    
+    CurrentState = [x(:,end)'];
+    
+    state = interp1(t',x',0:1:ceil(TransferTimes(n+1)));
+    TrajState = horzcat(TrajState, state(:,1:6)');
+    TrajControl = horzcat(TrajControl,state(:,7:11)');
+    
+    n = n + 2;
+    clock = ceil(TransferTimes(n))+ceil(TransferTimes(n+1))+clock;
+    
+end
+
+[x_drift,v_drift] = CWHPropagator(CurrentState(1:3)',CurrentState(4:6)',Omega,0:TransferTimes(n));
+CurrentState = [x_drift(1:3,end)',v_drift(1:3,end)'];
+
+TrajState = horzcat(TrajState, [x_drift(1:3,:);v_drift(1:3,:)]);
+TrajControl = horzcat(TrajControl,zeros(5,ceil(TransferTimes(n))));
+TrajTime = horzcat(TrajTime,clock:TransferTimes(n));
+
+
+ReturnState = InitState;
+output = PropagateGPOPS(CurrentState(1:6),ReturnState,0,ceil(TransferTimes(n+1)),auxdata);
+solution = output.result.solution;
+
+x1    = solution.phase(1).state(:,1); % km
+y1    = solution.phase(1).state(:,2); % km
+z1    = solution.phase(1).state(:,3); % km
+xdot  = solution.phase(1).state(:,4); % km/s
+ydot  = solution.phase(1).state(:,5); % km/s
+zdot  = solution.phase(1).state(:,6); % km/s
+alpha = solution.phase(1).state(:,7); % rad
+beta  = solution.phase(1).state(:,8); % rad
+alphadot  = solution.phase(1).control(:,1); 
+betadot   = solution.phase(1).control(:,2); 
+thr       = solution.phase(1).control(:,3); 
+
+x = [x1';y1';z1';xdot';ydot';zdot';alpha';beta';alphadot';betadot';thr'];
+t = solution.phase(1).time; % NOW IN MINUTES
+
+CurrentState = [x(:,end)'];
+
+state = interp1(t',x',0:1:ceil(TransferTimes(n+1)));
+TrajState = horzcat(TrajState, state(:,1:6)');
+TrajControl = horzcat(TrajControl,state(:,7:11)');
+
+Solution.GPOPS.TrajState = TrajState;
+Solution.GPOPS.TrajControl = TrajControl;
+Solution.GPOPS.TrajTime = TrajTime;
 
 end

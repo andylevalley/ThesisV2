@@ -2,7 +2,7 @@ clc
 clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%% Shell Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Scenario Parameters
-Problem.TimeTotal = 60*60*24*2.2; % seconds
+Problem.TimeTotal = 60*60*24*4; % seconds
 Problem.NumberMarks = 2;
 Problem.Omega = 7.291e-5; % mean motion (rad/sec)
 Problem.InitState = [0 0 0 0 0 0]; % [x,y,z,xdot,ydot,zdot];
@@ -23,13 +23,13 @@ Problem.lb_init = 1;
 Problem.ub_init = 60*60*24;
 Problem.lb_loiter = 60*60*24;
 Problem.lb_transfer = 60*30;
-Problem.ub_loiter = 60*60*25;
+Problem.ub_loiter = 60*60*30;
 Problem.ub_transfer = 60*60*24;
 Problem.ub_beta = 2*pi;
 Problem.lb_beta = 0;
 
 %% Optimization Parameters
-Problem.GA.Popsize = 100;
+Problem.GA.Popsize = 200;
 Problem.GA.EliteCount = ceil(0.1*Problem.GA.Popsize);
 Problem.GA.MaxGenerations = 500;
 Problem.GA.UseParallel = false;
@@ -40,9 +40,9 @@ Problem.GA.CrossoverFraction = 0.9;
 % ['TD', size, yd, xd, constraint]
 ae = 5;
 halfconeangle = deg2rad(20);
-zmax = ae*tan(halfconeangle);
+zmax1 = ae*tan(halfconeangle);
 Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
-                     {'NMC',ae,0,0,zmax,-pi/2,'sun'}];
+                     {'NMC',ae,0,0,zmax1,-pi/2,'sun'}];
                  
 % Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
 %                     {'NMC',ae+5,0,0,0,0,'sun'}];
@@ -71,16 +71,15 @@ Problem.RSO.Parms.p = Problem.RSO.Parms.sma*(1-Problem.RSO.Parms.ecc^2);
 % 1 = HCWimpulsive, 2 = BVP
 Problem.GA.FitnessFunction = 1;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%% Unpack Shell %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Unpack Shell 
 Problem = UnpackShell(Problem);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%% Run GA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Run GA 
 Solution = RunGA(Problem);
 close(gcf);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%% Propagate Solution %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Propagate Solution 
 Solution = PropagateSolution(Solution,Problem);
-
 
 %% Plot solution
 
@@ -95,19 +94,29 @@ Time3 = ceil(sum(TransferTimes(1:4)));
 Time4 = ceil(sum(TransferTimes(1:5)));
 
 figure(1)
-plot3(Solution.BVP.TrajState(2,:),Solution.BVP.TrajState(1,:),Solution.BVP.TrajState(3,:),'k')
+plot3(Solution.GPOPS.TrajState(2,1:Time1),Solution.GPOPS.TrajState(1,1:Time1),Solution.GPOPS.TrajState(3,1:Time1),'r')
+hold on
+plot3(Solution.GPOPS.TrajState(2,Time1:Time2),Solution.GPOPS.TrajState(1,Time1:Time2),Solution.GPOPS.TrajState(3,Time1:Time2),'b')
+hold on
+plot3(Solution.GPOPS.TrajState(2,Time2:Time3),Solution.GPOPS.TrajState(1,Time2:Time3),Solution.GPOPS.TrajState(3,Time2:Time3),'r')
+hold on
+plot3(Solution.GPOPS.TrajState(2,Time3:Time4),Solution.GPOPS.TrajState(1,Time3:Time4),Solution.GPOPS.TrajState(3,Time3:Time4),'b')
+hold on
+plot3(Solution.GPOPS.TrajState(2,Time4:end),Solution.GPOPS.TrajState(1,Time4:end),Solution.GPOPS.TrajState(3,Time4:end),'r')
 xlabel('y');
 ylabel('x');
 zlabel('z');
 hold on
 
-scatter3(Solution.BVP.TrajState(2,Time1),Solution.BVP.TrajState(1,Time1),Solution.BVP.TrajState(3,Time1),'MarkerFaceColor','g','MarkerEdgeColor','k')
+scatter3(Solution.GPOPS.TrajState(2,1),Solution.GPOPS.TrajState(1,1),Solution.GPOPS.TrajState(3,1),'MarkerFaceColor','g','MarkerEdgeColor','k')
 hold on
-scatter3(Solution.BVP.TrajState(2,Time2),Solution.BVP.TrajState(1,Time2),Solution.BVP.TrajState(3,Time2),'MarkerFaceColor','r','MarkerEdgeColor','k')
+scatter3(Solution.GPOPS.TrajState(2,Time1),Solution.GPOPS.TrajState(1,Time1),Solution.GPOPS.TrajState(3,Time1),'MarkerFaceColor','r','MarkerEdgeColor','k')
 hold on
-scatter3(Solution.BVP.TrajState(2,Time3),Solution.BVP.TrajState(1,Time3),Solution.BVP.TrajState(3,Time3),'MarkerFaceColor','g','MarkerEdgeColor','k')
+scatter3(Solution.GPOPS.TrajState(2,Time2),Solution.GPOPS.TrajState(1,Time2),Solution.GPOPS.TrajState(3,Time2),'MarkerFaceColor','g','MarkerEdgeColor','k')
 hold on
-scatter3(Solution.BVP.TrajState(2,Time4),Solution.BVP.TrajState(1,Time4),Solution.BVP.TrajState(3,Time4),'MarkerFaceColor','r','MarkerEdgeColor','k')
+scatter3(Solution.GPOPS.TrajState(2,Time3),Solution.GPOPS.TrajState(1,Time3),Solution.GPOPS.TrajState(3,Time3),'MarkerFaceColor','r','MarkerEdgeColor','k')
+hold on
+scatter3(Solution.GPOPS.TrajState(2,Time4),Solution.GPOPS.TrajState(1,Time4),Solution.GPOPS.TrajState(3,Time4),'MarkerFaceColor','g','MarkerEdgeColor','k')
 hold on
 
 % r_RSO = [42164;0;0];

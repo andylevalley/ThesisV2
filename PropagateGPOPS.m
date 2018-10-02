@@ -85,9 +85,8 @@ bounds.phase(iphase).integral.upper = [100];
 %--------------------------------------------------------------------------%
 %------------------------- Set Up Initial Guess ---------------------------%
 %--------------------------------------------------------------------------%
-tGuess = [t0; tfmax/2]; % fixed initial time, guessing half of upper bound
+tGuess = [t0; tfmax]; % fixed initial time, guessing half of upper bound
 
-theta0 = atan2(y0,x0);
 xGuess = [x0;0];
 yGuess = [y0;0];
 zGuess = [z0;0];
@@ -118,9 +117,9 @@ meshphase.fraction   = ones(1,N)/N;
 %--------------------------------------------------------------------------%
 %-------------------------- Set Up for Solver -----------------------------%
 %--------------------------------------------------------------------------%
-setup.name = 'HCW-Min-Time-to-Target';
-setup.functions.continuous = @HCWmintToTarget_Continuous; % the dynamics (and path constraints?)
-setup.functions.endpoint = @HCWmintToTarget_Endpoint;
+setup.name = 'GPOPS_Mark';
+setup.functions.continuous = @GPOPS_Continuous; % the dynamics (and path constraints?)
+setup.functions.endpoint = @GPOPS_Endpoint;
 
 setup.displaylevel = 2; % ?
 setup.nlp.solver = 'ipopt';
