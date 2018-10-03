@@ -196,6 +196,7 @@ Solution.GPOPS.TrajTime = TrajTime;
 
 %% Find Sun Angle throughout trajectory
 Traj = Solution.GPOPS.TrajState;
+
 sma = Problem.RSO.Parms.sma; % semi-major axis of *circular* RSO or virtual RSO (km)
 nu0 = Problem.RSO.Parms.nu0; % initial true anomaly of RSO or virtual RSO (deg)
 ecc = Problem.RSO.Parms.ecc; % eccentricity - this should be or stay very close to zero - we are using the HCW equations!
@@ -212,26 +213,47 @@ mu = Problem.mu;
 TimeJD = Problem.Time.JD;
 clock = 0;
 n = 1;
+i = 1;
+Time(n) = clock;
 
-for i = 1:100:length(Traj)
+TimeJD = TimeJD + clock/3600/24; % clock is in seconds
+UTCO = JDtoGregorianDate(TimeJD);
+nu_current = nu0 + w*clock;
+
+[r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
+RSO2Sun(1:3,n) = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO);
+
+theta(n,1) = acos(dot(Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
+
+
+
+for i = 100:100:length(Traj)
     
-    
+    n = n + 1;
+    clock = clock + i;
+    Time(n) = clock;
+   
     TimeJD = TimeJD + clock/3600/24; % clock is in seconds
     UTCO = JDtoGregorianDate(TimeJD);
     nu_current = nu0 + w*clock;
 
     [r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
-    Sun2RSO = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO)';
+    RSO2Sun(1:3,n) = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO);
     
-    theta = acos(dot(Traj(1:3,i),Sun2RSO)/(norm(Traj(1:3,i))*norm(Sun2RSO)));
+    theta(n,1) = pi - acos(dot(Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
     
-    SunAngle(1,n) = theta;
-        
-    clock = clock + 1;
-    n = n + 1;
+    if isnan(theta(n,1)) == 1
+        theta(n,1) = 0;
+    end
+
     
 end
 
-Solution.GPOPS.SunAngle = SunAngle;
+SunVec = interp1(Time,RSO2Sun',0:1:length(Traj))';
+thetaInterp = interp1(Time,theta,0:1:length(Traj));
+
+Solution.GPOPS.SunAngle = thetaInterp;
+Solution.GPOPS.RSO2Sun = SunVec;
+
 
 end

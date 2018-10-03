@@ -2,7 +2,7 @@ clc
 clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%% Shell Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Scenario Parameters
-Problem.TimeTotal = 60*60*24*4; % seconds
+Problem.TimeTotal = 60*60*24*5; % seconds
 Problem.NumberMarks = 2;
 Problem.Omega = 7.291e-5; % mean motion (rad/sec)
 Problem.InitState = [0 0 0 0 0 0]; % [x,y,z,xdot,ydot,zdot];
@@ -31,7 +31,7 @@ Problem.lb_beta = 0;
 %% Optimization Parameters
 Problem.GA.Popsize = 200;
 Problem.GA.EliteCount = ceil(0.1*Problem.GA.Popsize);
-Problem.GA.MaxGenerations = 500;
+Problem.GA.MaxGenerations = 200;
 Problem.GA.UseParallel = false;
 Problem.GA.CrossoverFraction = 0.9;
 
@@ -42,7 +42,7 @@ ae = 5;
 halfconeangle = deg2rad(20);
 zmax1 = ae*tan(halfconeangle);
 Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
-                     {'NMC',ae,0,0,zmax1,-pi/2,'sun'}];
+                     {'NMC',ae,0,0,zmax1,pi/2,'sun'}];
                  
 % Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
 %                     {'NMC',ae+5,0,0,0,0,'sun'}];
@@ -92,6 +92,7 @@ Time1 = ceil(sum(TransferTimes(1:2)));
 Time2 = ceil(sum(TransferTimes(1:3)));
 Time3 = ceil(sum(TransferTimes(1:4)));
 Time4 = ceil(sum(TransferTimes(1:5)));
+Time5 = ceil(sum(TransferTimes(1:6)));
 
 figure(1)
 plot3(Solution.GPOPS.TrajState(2,1:Time1),Solution.GPOPS.TrajState(1,1:Time1),Solution.GPOPS.TrajState(3,1:Time1),'r')
@@ -119,79 +120,31 @@ hold on
 scatter3(Solution.GPOPS.TrajState(2,Time4),Solution.GPOPS.TrajState(1,Time4),Solution.GPOPS.TrajState(3,Time4),'MarkerFaceColor','g','MarkerEdgeColor','k')
 hold on
 
-% r_RSO = [42164;0;0];
-% v_RSO = [0;3.0747;0];
-% Sun2RSO1 = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO)';
-% Sun2RSO2 = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO)';
-
-% pull out relevent values from Problem structure
-NumberMarks = Problem.NumberMarks;
-TimeJD = Problem.Time.JD;
-UTCO = Problem.Time.UTCO;
-TimeTotal = Problem.TimeTotal;
-Omega = Problem.Omega;
-
-sma = Problem.RSO.Parms.sma; % semi-major axis of *circular* RSO or virtual RSO (km)
-nu0 = Problem.RSO.Parms.nu0; % initial true anomaly of RSO or virtual RSO (deg)
-ecc = Problem.RSO.Parms.ecc; % eccentricity - this should be or stay very close to zero - we are using the HCW equations!
-incl = Problem.RSO.Parms.incl; % inclination (deg) - this combined with RAAN should be appropriate for use (see dissertation)
-RAAN = Problem.RSO.Parms.RAAN; % right ascension of the ascending node (deg) - see note above
-argp = Problem.RSO.Parms.argp; % argument of perigee (deg)
-arglat = Problem.RSO.Parms.arglat; % for ci orbit
-truelon = Problem.RSO.Parms.truelon; % for ce orbit
-lonper = Problem.RSO.Parms.lonper; % for ee orbit
-w = Problem.RSO.Parms.w;
-p = Problem.RSO.Parms.p;
-mu = Problem.mu;
-
-% Seperate chromosome
-Order = dvar(1:NumberMarks);
-TransferTimes = dvar(NumberMarks+1:end-2);
-
-
-% Sun constraint
-InitState = Problem.InitState;
-Marks = Problem.Mark.Info;
-beta = dvar(end-NumberMarks+1:end);
-
-count = size(Marks,1);
-
-% Targets states defined by user
-TargetInfo = zeros(count,6);
-for i = 1:count
-    TargetInfo(i,1:6) = Target(Omega,Marks,beta,i);
-end
-
-% Starting after initial wait and transfer
-clock = sum(TransferTimes(1:2));
-n = 3;
-
-
-TimeJD = TimeJD + clock/3600/24; % clock is in seconds
-UTCO = JDtoGregorianDate(TimeJD);
-nu_current = nu0 + w*clock;
-
-for i = 1:NumberMarks
-    
-    tgt = dvar(i);
-
-    [r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
-    Sun2RSO(i,:) = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO)';
-    StartState = TargetInfo(tgt,1:6);
-    
-    SunAngleStart(i,:) = acos(dot(StartState(1:3),Sun2RSO(i,:))/(norm(StartState(1:3))*norm(Sun2RSO(i,:))));
-    
-    clock = clock + TransferTimes(n) + TransferTimes(n+1);
-    TimeJD = TimeJD + clock/3600/24; % clock is in seconds
-    UTCO = JDtoGregorianDate(TimeJD); 
-    nu_current = nu_current + w*clock;
-    n = n + 2;
-    
-end
-
-q = quiver3(0,0,0,Sun2RSO(1,2),Sun2RSO(1,1),Sun2RSO(1,3));
+SunVec = Solution.GPOPS.RSO2Sun;
+q = quiver3(0,0,0,SunVec(2,Time1),SunVec(1,Time1),SunVec(3,Time1));
 q.Color = 'r';
+q = quiver3(0,0,0,SunVec(2,Time2),SunVec(1,Time1),SunVec(3,Time2));
+q.Color = 'r';
+
+q = quiver3(0,0,0,SunVec(2,Time3),SunVec(1,Time3),SunVec(3,Time3));
+q.Color = 'g';
+q = quiver3(0,0,0,SunVec(2,Time4),SunVec(1,Time4),SunVec(3,Time4));
+q.Color = 'g';
+
+figure(2)
+SunAngle = Solution.GPOPS.SunAngle;
+plot(rad2deg(SunAngle))
 hold on
-q = quiver3(0,0,0,Sun2RSO(2,2),Sun2RSO(2,1),Sun2RSO(2,3));
-q.Color = 'r';
-hold off
+plot([Time1 Time1], ylim,'k') 
+hold on
+plot([Time2 Time2], ylim,'k') 
+hold on
+plot([Time3 Time3], ylim,'k') 
+hold on
+plot([Time4 Time4], ylim,'k') 
+
+
+% hold on
+% q = quiver3(0,0,0,Sun2RSO(2,2),Sun2RSO(2,1),Sun2RSO(2,3));
+% q.Color = 'r';
+% hold off

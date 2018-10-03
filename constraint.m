@@ -65,10 +65,10 @@ for i = 1:NumberMarks
     tgt = dvar(i);
 
     [r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
-    Sun2RSO_Start = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO)';
+    RSO2Sun = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO);
     StartState = TargetInfo(tgt,1:6);
     
-    thetaStart = acos(dot(StartState(1:3),Sun2RSO_Start)/(norm(StartState(1:3))*norm(Sun2RSO_Start)));
+    thetaStart = acos(dot(StartState(1:3),RSO2Sun')/(norm(StartState(1:3))*norm(RSO2Sun')));
     
     if strcmp(Marks{i,end},'sun') == 1
         c(end+1:end+2,1) = [-SunAngleCon + thetaStart];
