@@ -43,8 +43,8 @@ for i = 1:length(Order)
     sol = bvp4c(@BVP_ode,@BVP_bc,solinit,options,CurrentState,TargetInfo(tgt,:),Omega);
     t = [sol.x];
     x = [sol.y]; 
-    u_x = -x(6,:);
-    u_y = -x(8,:);
+    u_x = x(6,:);
+    u_y = x(8,:);
     CurrentState = [x(1,end) x(3,end) 0 x(2,end) x(4,end) 0];
     
     TrajState = horzcat(TrajState, x(1:4,:));

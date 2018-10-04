@@ -42,7 +42,7 @@ ae = 5;
 halfconeangle = deg2rad(20);
 zmax1 = ae*tan(halfconeangle);
 Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
-                     {'NMC',ae,0,0,zmax1,pi/2,'sun'}];
+                     {'NMC',ae,0,0,zmax1,pi/2,'none'}];
                  
 % Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
 %                     {'NMC',ae+5,0,0,0,0,'sun'}];
@@ -133,18 +133,41 @@ hold on
 
 figure(2)
 SunAngle = Solution.GPOPS.SunAngle;
-plot(rad2deg(SunAngle))
+plot(rad2deg(SunAngle(1:3600:end)))
+axis tight
+title('Sun Angle Throughout Trajectory')
+ylabel('Angle (degs)')
+xlabel('Time (hrs)')
+
+x_points = [Time1/3600, Time1/3600, Time2/3600, Time2/3600];  
+y_points = [0, 90, 90, 0];
+color = [0, 0, 1];
+hold on;
+a = fill(x_points, y_points, color);
+a.FaceAlpha = 0.1;
+
 hold on
-plot([Time1 Time1], ylim,'k') 
-hold on
-plot([Time2 Time2], ylim,'k') 
-hold on
-plot([Time3 Time3], ylim,'k') 
-hold on
-plot([Time4 Time4], ylim,'k') 
+x_points = [Time3/3600, Time3/3600, Time4/3600, Time4/3600];  
+y_points = [0, 90, 90, 0];
+color = [0, 0, 1];
+a = fill(x_points, y_points, color);
+a.FaceAlpha = 0.1;
+
+[~,h_legend] = legend('Sun Angle','NMC 1','NMC 2');
+PatchInLegend = findobj(h_legend, 'type', 'patch');
+set(PatchInLegend(1), 'FaceAlpha', 0.1);
+set(PatchInLegend(2), 'FaceAlpha', 0.1);
 
 
-% hold on
-% q = quiver3(0,0,0,Sun2RSO(2,2),Sun2RSO(2,1),Sun2RSO(2,3));
-% q.Color = 'r';
-% hold off
+figure(3)
+Traj = Solution.GPOPS.TrajState;
+time = 1:1:length(Traj);
+plot(time,Traj(1,:),time,Traj(2,:),time,Traj(3,:))
+labels = (1:3600:length(Traj))/3600;
+ticks = linspace(min(length(Traj)), max(length(Traj)), 5); 
+set(gca,'xtickLabel', labels);
+xlabel('Time (secs)')
+ylabel('km')
+axis tight
+
+
