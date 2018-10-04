@@ -42,7 +42,7 @@ ae = 5;
 halfconeangle = deg2rad(20);
 zmax1 = ae*tan(halfconeangle);
 Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
-                     {'NMC',ae,0,0,zmax1,pi/2,'none'}];
+                     {'NMC',ae,0,0,zmax1,pi/2,'sun'}];
                  
 % Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
 %                     {'NMC',ae+5,0,0,0,0,'sun'}];
@@ -133,7 +133,8 @@ hold on
 
 figure(2)
 SunAngle = Solution.GPOPS.SunAngle;
-plot(rad2deg(SunAngle(1:3600:end)))
+SA = plot(rad2deg(SunAngle(1:3600:end)),'-or');
+SA.LineWidth = 2;
 axis tight
 title('Sun Angle Throughout Trajectory')
 ylabel('Angle (degs)')
@@ -151,23 +152,53 @@ x_points = [Time3/3600, Time3/3600, Time4/3600, Time4/3600];
 y_points = [0, 90, 90, 0];
 color = [0, 0, 1];
 a = fill(x_points, y_points, color);
-a.FaceAlpha = 0.1;
+a.FaceAlpha = 0.3;
 
 [~,h_legend] = legend('Sun Angle','NMC 1','NMC 2');
 PatchInLegend = findobj(h_legend, 'type', 'patch');
 set(PatchInLegend(1), 'FaceAlpha', 0.1);
-set(PatchInLegend(2), 'FaceAlpha', 0.1);
+set(PatchInLegend(2), 'FaceAlpha', 0.3);
 
 
 figure(3)
+ylim auto
 Traj = Solution.GPOPS.TrajState;
 time = 1:1:length(Traj);
-plot(time,Traj(1,:),time,Traj(2,:),time,Traj(3,:))
-labels = (1:3600:length(Traj))/3600;
-ticks = linspace(min(length(Traj)), max(length(Traj)), 5); 
-set(gca,'xtickLabel', labels);
-xlabel('Time (secs)')
+xplot = plot(time,Traj(1,:),'-.',time,Traj(2,:),'-.',time,Traj(3,:),'-.');
+xplot(1).LineWidth = 2;
+xplot(2).LineWidth = 2;
+xplot(3).LineWidth = 2;
+
+
+ticks = 0:3600*5:length(Traj);
+
+for i = 1:length(ticks)
+    labels(i) = ticks(i)/3600;
+end
+
+xticklabels(labels)
+xticks(ticks)
+xlabel('Time (hours)')
 ylabel('km')
 axis tight
+
+x_points = [Time1, Time1, Time2, Time2];  
+y_points = [-6, 6, 6, -6];
+color = [0, 0, 1];
+hold on;
+a = fill(x_points, y_points, color);
+a.FaceAlpha = 0.1;
+
+hold on
+x_points = [Time3, Time3, Time4, Time4];  
+y_points = [-6, 6, 6, -6];
+color = [0, 0, 1];
+a = fill(x_points, y_points, color);
+a.FaceAlpha = 0.3;
+
+[~,h_legend] = legend('x','y','z','NMC 1','NMC 2');
+PatchInLegend = findobj(h_legend, 'type', 'patch');
+set(PatchInLegend(1), 'FaceAlpha', 0.1);
+set(PatchInLegend(2), 'FaceAlpha', 0.3);
 
 
