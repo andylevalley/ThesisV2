@@ -1,4 +1,4 @@
-function RSO2Sun = sun2RSO(year,mo,d,h,mins,s,r_RSO,v_RSO)
+function r_sun2RSO_unit = sun2RSO(year,mo,d,h,mins,s,r_RSO,v_RSO)
 
 % Calculate Julian date
 JulianDate = JD(year,mo,d,h,mins,s);
@@ -9,6 +9,7 @@ r_E2sun = sunvector(JD_UT1); % in AUs (1 AU = 149,597,870 km)
 
 % Define AU unit
 AU = 149597870; % km
+
 
 % FROM p. 604 of SCHAUB
 % Given current position and velocity of RSO, calculate DCM:
@@ -27,5 +28,5 @@ ON = [ohat_r';ohat_theta';ohat_h'];
 RSO2Sun = ON*(r_E2sun-r_RSO/AU);
 
 % Flip direction to find vector from sun to RSO in relative frame
-% r_sun2RSO = -r_RSO2sun;
-% r_sun2RSO_unit = r_sun2RSO/norm(r_sun2RSO); % This is sun shine angle for current time
+r_sun2RSO = -RSO2Sun;
+r_sun2RSO_unit = r_sun2RSO/norm(r_sun2RSO); % This is sun shine angle for current time

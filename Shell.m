@@ -2,7 +2,7 @@ clc
 clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%% Shell Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Scenario Parameters
-Problem.TimeTotal = 60*60*24*5; % seconds
+Problem.TimeTotal = 60*60*24*3; % seconds
 Problem.NumberMarks = 2;
 Problem.Omega = 7.291e-5; % mean motion (rad/sec)
 Problem.InitState = [0 0 0 0 0 0]; % [x,y,z,xdot,ydot,zdot];
@@ -42,7 +42,7 @@ ae = 5;
 halfconeangle = deg2rad(20);
 zmax1 = ae*tan(halfconeangle);
 Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
-                     {'NMC',ae,0,0,zmax1,pi/2,'sun'}];
+                     {'NMC',ae,0,0,zmax1,pi/2,'none'}];
                  
 % Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
 %                     {'NMC',ae+5,0,0,0,0,'sun'}];
@@ -121,14 +121,14 @@ scatter3(Solution.GPOPS.TrajState(2,Time4),Solution.GPOPS.TrajState(1,Time4),Sol
 hold on
 
 SunVec = Solution.GPOPS.RSO2Sun;
-q = quiver3(0,0,0,SunVec(2,Time1),SunVec(1,Time1),SunVec(3,Time1));
+q = quiver3(SunVec(2,Time1)*5,SunVec(1,Time1)*5,SunVec(3,Time1)*5,SunVec(2,Time1)*5,SunVec(1,Time1)*5,SunVec(3,Time1)*5);
 q.Color = 'r';
-q = quiver3(0,0,0,SunVec(2,Time2),SunVec(1,Time1),SunVec(3,Time2));
+q = quiver3(0,0,0,SunVec(1,Time2),SunVec(2,Time1),SunVec(3,Time2));
 q.Color = 'r';
 
-q = quiver3(0,0,0,SunVec(2,Time3),SunVec(1,Time3),SunVec(3,Time3));
+q = quiver3(0,0,0,SunVec(1,Time3),SunVec(2,Time3),SunVec(3,Time3));
 q.Color = 'g';
-q = quiver3(0,0,0,SunVec(2,Time4),SunVec(1,Time4),SunVec(3,Time4));
+q = quiver3(0,0,0,SunVec(1,Time4),SunVec(2,Time4),SunVec(3,Time4));
 q.Color = 'g';
 
 figure(2)
