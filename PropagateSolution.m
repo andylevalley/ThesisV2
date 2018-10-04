@@ -216,31 +216,19 @@ n = 1;
 i = 1;
 Time(n) = clock;
 
-TimeJD = TimeJD + clock/3600/24; % clock is in seconds
-UTCO = JDtoGregorianDate(TimeJD);
-nu_current = nu0 + w*clock;
-
-[r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
-RSO2Sun(1:3,n) = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO);
-
+[RSO2Sun] = SunVecRSO(clock);
 theta(n,1) = acos(dot(Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
-
 
 
 for i = 100:100:length(Traj)
     
     n = n + 1;
-    clock = clock + i;
+    clock = clock + 100;
     Time(n) = clock;
-   
-    TimeJD = TimeJD + clock/3600/24; % clock is in seconds
-    UTCO = JDtoGregorianDate(TimeJD);
-    nu_current = nu0 + w*clock;
 
-    [r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
-    RSO2Sun(1:3,n) = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO);
+    RSO2Sun(1:3,n) = SunVecRSO(clock);
     
-    theta(n,1) = pi - acos(dot(Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
+    theta(n,1) = acos(dot(-Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(-Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
     
     if isnan(theta(n,1)) == 1
         theta(n,1) = 0;

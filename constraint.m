@@ -56,19 +56,14 @@ clock = sum(TransferTimes(1:2));
 n = 3;
 
 
-TimeJD = TimeJD + clock/3600/24; % clock is in seconds
-UTCO = JDtoGregorianDate(TimeJD);
-nu_current = nu0 + w*clock;
-
 for i = 1:NumberMarks
     
     tgt = dvar(i);
 
-    [r_RSO,v_RSO] = coe2rvh(p,ecc,incl,Omega,argp,nu_current,arglat,truelon,lonper,mu);
-    RSO2Sun = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r_RSO,v_RSO);
+    [RSO2Sun] = SunVecRSO(clock);
     StartState = TargetInfo(tgt,1:6);
     
-    thetaStart = acos(dot(StartState(1:3),RSO2Sun')/(norm(StartState(1:3))*norm(RSO2Sun')));
+    thetaStart = acos(dot(-StartState(1:3),RSO2Sun')/(norm(-StartState(1:3))*norm(RSO2Sun')));
     
     if strcmp(Marks{i,end},'sun') == 1
         c(end+1:end+2,1) = [-SunAngleCon + thetaStart];
@@ -76,9 +71,6 @@ for i = 1:NumberMarks
     end
     
     clock = clock + TransferTimes(n) + TransferTimes(n+1);
-    TimeJD = TimeJD + clock/3600/24; % clock is in seconds
-    UTCO = JDtoGregorianDate(TimeJD); 
-    nu_current = nu_current + w*clock;
     n = n + 2;
     
 end
