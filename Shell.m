@@ -48,7 +48,7 @@ Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
 %                     {'NMC',ae+5,0,0,0,0,'sun'}];
 
                  
-Problem.Mark.Constraints.SunAngle = deg2rad(30);
+Problem.Mark.Constraints.SunAngle = deg2rad(45);
 
                  
 %% Define RSO or Virtual Chief
@@ -133,23 +133,30 @@ hold on
 
 figure(2)
 SunAngle = Solution.GPOPS.SunAngle;
-SA = plot(rad2deg(SunAngle(1:3600:end)),'-or');
+SA = plot(rad2deg(SunAngle),'-r');
 SA.LineWidth = 2;
 axis tight
 title('Sun Angle Throughout Trajectory')
 ylabel('Angle (degs)')
 xlabel('Time (hrs)')
 
-x_points = [Time1/3600, Time1/3600, Time2/3600, Time2/3600];  
-y_points = [0, 90, 90, 0];
+ticks = 0:3600*5:length(Solution.GPOPS.SunAngle);
+for i = 1:length(ticks)
+    labels(i) = ticks(i)/3600;
+end
+xticklabels(labels)
+xticks(ticks)
+
+x_points = [Time1, Time1, Time2, Time2];  
+y_points = [0, 180, 180, 0];
 color = [0, 0, 1];
 hold on;
 a = fill(x_points, y_points, color);
 a.FaceAlpha = 0.1;
 
 hold on
-x_points = [Time3/3600, Time3/3600, Time4/3600, Time4/3600];  
-y_points = [0, 90, 90, 0];
+x_points = [Time3, Time3, Time4, Time4];  
+y_points = [0, 180, 180, 0];
 color = [0, 0, 1];
 a = fill(x_points, y_points, color);
 a.FaceAlpha = 0.3;
@@ -158,6 +165,13 @@ a.FaceAlpha = 0.3;
 PatchInLegend = findobj(h_legend, 'type', 'patch');
 set(PatchInLegend(1), 'FaceAlpha', 0.1);
 set(PatchInLegend(2), 'FaceAlpha', 0.3);
+
+ticks = 0:3600*5:length(Traj);
+for i = 1:length(ticks)
+    labels(i) = ticks(i)/3600;
+end
+xticklabels(labels)
+xticks(ticks)
 
 
 figure(3)
