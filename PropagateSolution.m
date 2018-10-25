@@ -4,7 +4,7 @@ function Solution = PropagateSolution(Solution,Problem)
 % pull out relevent values from Problem structure
 NumberMarks = Problem.NumberMarks;
 TimeJD = Problem.Time.JD;
-TimeUTCO = Problem.Time.UTCO;
+UTCO = Problem.Time.UTCO;
 Omega = Problem.Omega;
 dvar = Solution.dvar;
 
@@ -17,11 +17,11 @@ InitState = Problem.InitState;
 Marks = Problem.Mark.Info;
 beta = dvar(end-NumberMarks+1:end);
 
-count = size(Marks,1);
+count = NumberMarks;
 
 TargetInfo = zeros(count,6);
 for i = 1:count
-    TargetInfo(i,1:6) = Target(Omega,Marks,beta,i);
+    TargetInfo(i,1:6) = Target(Omega,Marks,beta,i,NumberMarks,Order,TransferTimes);
 end
 
 % Calculate Fitness
@@ -216,7 +216,7 @@ n = 1;
 i = 1;
 Time(n) = clock;
 
-[RSO2Sun] = SunVecRSO(clock);
+[RSO2Sun] = SunVecRSO(UTCO,clock);
 theta(n,1) = acos(dot(Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
 
 
@@ -226,7 +226,7 @@ for i = 100:100:length(Traj)
     clock = clock + 100;
     Time(n) = clock;
 
-    RSO2Sun(1:3,n) = SunVecRSO(clock);
+    RSO2Sun(1:3,n) = SunVecRSO(UTCO,clock);
     
     theta(n,1) = acos(dot(-Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(-Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
     

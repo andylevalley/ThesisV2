@@ -19,7 +19,7 @@ count = size(Marks,1);
 
 TargetInfo = zeros(count,6);
 for i = 1:count
-    TargetInfo(i,1:6) = Target(Omega,Marks,beta,i);
+    TargetInfo(i,1:6) = Target(Omega,Marks,beta,i,NumberMarks,Order,TransferTimes);
 end
 
 %% Calculate Fitness

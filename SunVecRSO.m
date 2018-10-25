@@ -1,15 +1,15 @@
-function [RSO2Sun] = SunVecRSO(time)
+function [RSO2Sun] = SunVecRSO(UTCO,time)
 
 % current working epoch 
 epoch = [2011 08 16 17 00 00];
 
 %Compute the Julian Date (JD) from a Gregorian Date (UT1) input
-yr=epoch(1);  %(year)
-mo=epoch(2);  %(month)
-d=epoch(3);  %(day)
-h=epoch(4);  %(hr)
-min=epoch(5);  %(min)
-s=epoch(6);  %(sec)
+yr=UTCO(1);  %(year)
+mo=UTCO(2);  %(month)
+d=UTCO(3);  %(day)
+h=UTCO(4);  %(hr)
+min=UTCO(5);  %(min)
+s=UTCO(6);  %(sec)
 JD=367*yr-floor(7/4*(yr+floor((mo+9)/12)))+floor(275*mo/9)+d+1721013.5+(((s/60+min)/60)+h)/24;  %(JD)
 
 Re = 6378.1363e3;   %Earth's radius (m)
@@ -73,7 +73,7 @@ end
 
 function r = r_sun(T_UT1)
 
-lambdaM = 280.4606184+36000.77005361*T_UT1;  %(°)
+lambdaM = 280.4606184+36000.77005361*T_UT1;  %(ï¿½)
 M = (357.5277233+35999.05034*T_UT1)*pi/180.0;  %(rad)
 lambdaecliptic = (lambdaM+1.914666471*sin(M)+0.019994643*sin(2*M))*pi/180.0;  %(rad)
 E = (23.439291-0.0130042*T_UT1)*pi/180.0;  %(rad)

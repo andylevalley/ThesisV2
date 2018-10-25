@@ -48,24 +48,24 @@ count = size(Marks,1);
 % Targets states defined by user
 TargetInfo = zeros(count,6);
 for i = 1:count
-    TargetInfo(i,1:6) = Target(Omega,Marks,beta,i);
+    TargetInfo(i,1:6) = Target(Omega,Marks,beta,i,NumberMarks,Order,TransferTimes);
 end
 
 % Starting after initial wait and transfer
 clock = sum(TransferTimes(1:2));
 n = 3;
 
-
 for i = 1:NumberMarks
     
     tgt = dvar(i);
+    
 
-    [RSO2Sun] = SunVecRSO(clock);
+    [RSO2Sun] = SunVecRSO(UTCO,clock);
     StartState = TargetInfo(tgt,1:6);
     
     thetaStart = acos(dot(-StartState(1:3),RSO2Sun')/(norm(-StartState(1:3))*norm(RSO2Sun')));
     
-    if strcmp(Marks{i,end},'sun') == 1
+    if strcmp(Marks{i,7},'sun') == 1
         c(end+1:end+2,1) = [-SunAngleCon + thetaStart];
         
     end
@@ -75,10 +75,6 @@ for i = 1:NumberMarks
     
 end
     
-    
-    
-        
-
 
 ceq = [];
 end

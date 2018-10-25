@@ -36,18 +36,14 @@ Problem.GA.UseParallel = false;
 Problem.GA.CrossoverFraction = 0.9;
 
 %% Define Marks
-% ['NMC', ae, yd, xd, zmax, upsilon, constraint]
+% ['NMC', ae, xd, yd, zmax, upsilon, constraint, initState]
 % ['TD', size, yd, xd, constraint]
 ae = 5;
 halfconeangle = deg2rad(20);
 zmax1 = ae*tan(halfconeangle);
-Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
-                     {'NMC',ae,0,0,zmax1,pi/2,'sun'}];
-                 
-% Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun'};
-%                     {'NMC',ae+5,0,0,0,0,'sun'}];
-
-                 
+Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun',[5 5 0 0 0 0]};
+                     {'NMC',ae,0,0,zmax1,pi/2,'sun',[0 0 0 0 0 0]}];
+                                  
 Problem.Mark.Constraints.SunAngle = deg2rad(45);
 
                  
@@ -166,7 +162,7 @@ PatchInLegend = findobj(h_legend, 'type', 'patch');
 set(PatchInLegend(1), 'FaceAlpha', 0.1);
 set(PatchInLegend(2), 'FaceAlpha', 0.3);
 
-ticks = 0:3600*5:length(Traj);
+ticks = 0:3600*5:length(Solution.GPOPS.SunAngle);
 for i = 1:length(ticks)
     labels(i) = ticks(i)/3600;
 end
