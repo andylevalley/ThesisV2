@@ -216,7 +216,9 @@ n = 1;
 i = 1;
 Time(n) = clock;
 
-[RSO2Sun] = SunVecRSO(UTCO,clock);
+nu = nu0 + w*clock;
+[r,v] = coe2rvh (p,ecc,incl,Omega,argp,nu,nu,nu,lonper,mu);
+RSO2Sun = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r,v);
 theta(n,1) = acos(dot(Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
 
 
@@ -226,7 +228,9 @@ for i = 100:100:length(Traj)
     clock = clock + 100;
     Time(n) = clock;
 
-    RSO2Sun(1:3,n) = SunVecRSO(UTCO,clock);
+    nu = nu0 + w*clock;
+    [r,v] = coe2rvh (p,ecc,incl,Omega,argp,nu,nu,nu,lonper,mu);
+    RSO2Sun(1:3,n) = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r,v);
     
     theta(n,1) = acos(dot(-Traj(1:3,i)',RSO2Sun(1:3,n)')/(norm(-Traj(1:3,i)')*norm(RSO2Sun(1:3,n)')));
     
