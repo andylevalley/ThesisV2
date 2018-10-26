@@ -1,4 +1,4 @@
-function r_sun2RSO_unit = sun2RSO(year,mo,d,h,mins,s,r_RSO,v_RSO)
+function RSO2Sun = sun2RSO(year,mo,d,h,mins,s,r_RSO,v_RSO)
 
 % Calculate Julian date
 JulianDate = JD(year,mo,d,h,mins,s);
@@ -27,6 +27,6 @@ ON = [ohat_r';ohat_theta';ohat_h'];
 %r_RSO2sun_ECI_0 = r_EtoS_0-r_RSO/AU;
 RSO2Sun = ON*(r_E2sun-r_RSO/AU);
 
-% Flip direction to find vector from sun to RSO in relative frame
-r_sun2RSO = -RSO2Sun;
-r_sun2RSO_unit = r_sun2RSO/norm(r_sun2RSO); % This is sun shine angle for current time
+% % Flip direction to find vector from sun to RSO in relative frame
+% r_sun2RSO = -RSO2Sun;
+% r_sun2RSO_unit = r_sun2RSO/norm(r_sun2RSO); % This is sun shine angle for current time
