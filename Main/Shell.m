@@ -3,9 +3,9 @@ clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%% Shell Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Scenario Parameters
 Problem.TimeTotal = 60*60*24*3; % seconds
-Problem.NumberMarks = 3;
+Problem.NumberMarks = 2;
 Problem.Omega = 7.291e-5; % mean motion (rad/sec)
-Problem.InitState = [30 30 5 0 0 0]; % [x,y,z,xdot,ydot,zdot];
+Problem.InitState = [0 0 0 0 0 0]; % [x,y,z,xdot,ydot,zdot];
 Problem.TSP = 'yes';
 
 % UTC and JD time at beginning of maneuver, i.e. at t_0
@@ -20,10 +20,10 @@ Problem.Time.JD = JD(yr0,mo0,day0,hr0,min0,sec0);
 
 %% Bounds
 Problem.lb_init = 1;
-Problem.ub_init = 60*60;
-Problem.lb_loiter = 60*60*12;
+Problem.ub_init = 60*60*24;
+Problem.lb_loiter = 60*60*24;
 Problem.lb_transfer = 60*30;
-Problem.ub_loiter = 60*60*24;
+Problem.ub_loiter = 60*60*30;
 Problem.ub_transfer = 60*60*24;
 Problem.ub_beta = 2*pi;
 Problem.lb_beta = 0;
@@ -41,12 +41,11 @@ Problem.GA.CrossoverFraction = 0.9;
 ae = 5;
 halfconeangle = deg2rad(20);
 zmax1 = ae*tan(halfconeangle);
-zmax2 = ae*tan(deg2rad(160));
-Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun','VC'};
-                     {'NMC',ae,0,0,zmax1,pi/2,'sun','VC'};
-                     {'NMC',ae,0,0,zmax2,pi/2,'none','VC'}];
+
+Problem.Mark.Info = [{'NMC',ae,0,0,0,0,'sun',[0 0 0 0 0 0]};
+                     {'NMC',ae,0,0,zmax1,pi/2,'sun',[0 0 0 0 0 0]}];
                                                    
-Problem.Mark.Constraints.SunAngle = deg2rad(45);
+Problem.Mark.Constraints.SunAngle = deg2rad(30);
        
 %% Define Virtual Chief
 Problem.mu = 398600.5;
@@ -89,8 +88,6 @@ Time2 = ceil(sum(TransferTimes(1:3)));
 Time3 = ceil(sum(TransferTimes(1:4)));
 Time4 = ceil(sum(TransferTimes(1:5)));
 Time5 = ceil(sum(TransferTimes(1:6)));
-Time6 = ceil(sum(TransferTimes(1:7)));
-Time7 = ceil(sum(TransferTimes(1:8)));
 
 figure(1)
 plot3(Solution.GPOPS.TrajState(2,1:Time1),Solution.GPOPS.TrajState(1,1:Time1),Solution.GPOPS.TrajState(3,1:Time1),'r')
@@ -102,14 +99,6 @@ hold on
 plot3(Solution.GPOPS.TrajState(2,Time3:Time4),Solution.GPOPS.TrajState(1,Time3:Time4),Solution.GPOPS.TrajState(3,Time3:Time4),'b')
 hold on
 plot3(Solution.GPOPS.TrajState(2,Time4:Time5),Solution.GPOPS.TrajState(1,Time4:Time5),Solution.GPOPS.TrajState(3,Time4:Time5),'r')
-hold on
-plot3(Solution.GPOPS.TrajState(2,Time5:Time6),Solution.GPOPS.TrajState(1,Time5:Time6),Solution.GPOPS.TrajState(3,Time5:Time6),'b')
-hold on
-plot3(Solution.GPOPS.TrajState(2,Time6:Time7),Solution.GPOPS.TrajState(1,Time6:Time7),Solution.GPOPS.TrajState(3,Time6:Time7),'r')
-xlabel('y');
-ylabel('x');
-zlabel('z');
-hold on
 
 % scatter3(Solution.GPOPS.TrajState(2,1),Solution.GPOPS.TrajState(1,1),Solution.GPOPS.TrajState(3,1),'MarkerFaceColor','g','MarkerEdgeColor','k')
 % hold on
@@ -163,18 +152,10 @@ color = [0, 0, 1];
 a = fill(x_points, y_points, color);
 a.FaceAlpha = 0.3;
 
-hold on
-x_points = [Time5, Time5, Time6, Time6];  
-y_points = [0, 180, 180, 0];
-color = [0, 0, 1];
-a = fill(x_points, y_points, color);
-a.FaceAlpha = 0.5;
-
-[~,h_legend] = legend('Sun Angle','NMC 1','NMC 2','NMC 3');
+[~,h_legend] = legend('Sun Angle','NMC 1','NMC 2');
 PatchInLegend = findobj(h_legend, 'type', 'patch');
 set(PatchInLegend(1), 'FaceAlpha', 0.1);
 set(PatchInLegend(2), 'FaceAlpha', 0.3);
-set(PatchInLegend(3), 'FaceAlpha', 0.5);
 
 ticks = 0:3600*5:length(Solution.GPOPS.SunAngle);
 for i = 1:length(ticks)
@@ -220,17 +201,10 @@ color = [0, 0, 1];
 a = fill(x_points, y_points, color);
 a.FaceAlpha = 0.3;
 
-hold on
-x_points = [Time5, Time5, Time6, Time6];  
-y_points = [-6, 6, 6, -6];
-color = [0, 0, 1];
-a = fill(x_points, y_points, color);
-a.FaceAlpha = 0.5;
-
-[~,h_legend] = legend('x','y','z','NMC 1','NMC 2','NMC 3');
+[~,h_legend] = legend('x','y','z','NMC 1','NMC 2');
 PatchInLegend = findobj(h_legend, 'type', 'patch');
 set(PatchInLegend(1), 'FaceAlpha', 0.1);
 set(PatchInLegend(2), 'FaceAlpha', 0.3);
-set(PatchInLegend(3), 'FaceAlpha', 0.5);
+
 
 
