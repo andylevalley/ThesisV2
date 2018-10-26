@@ -30,10 +30,6 @@ A = sum(Order == test,1);
 B = ones(1,NumberMarks);
 
 
-% c = [sum(dvar(num_objects+1:end))- (t_total); % change t_total and num_objects 
-%     -(sum(order(:)==1)*sum(order(:)==2)*sum(order(:)==3)*sum(order(:)==4)*sum(order(:)==5))+1]; % this needs to change depending on number of objects 
-% ceq = [];
-
 %% Time and visit constraints
 c = [sum(TransferTimes)-(TimeTotal); % change t_total and num_objects 
     -(isequal(A,B))+1]; % this needs to change depending on number of objects 
@@ -59,8 +55,9 @@ for i = 1:NumberMarks
     
     tgt = dvar(i);
     
-
-    [RSO2Sun] = SunVecRSO(UTCO,clock);
+    nu = nu0 + w*clock;
+    [r,v] = coe2rvh (p,ecc,incl,Omega,argp,nu,nu,nu,lonper,mu);
+    [RSO2Sun] = sun2RSO(UTCO(1),UTCO(2),UTCO(3),UTCO(4),UTCO(5),UTCO(6),r,v);
     StartState = TargetInfo(tgt,1:6);
     
     thetaStart = acos(dot(-StartState(1:3),RSO2Sun')/(norm(-StartState(1:3))*norm(RSO2Sun')));
